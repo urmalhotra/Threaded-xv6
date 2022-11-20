@@ -39,3 +39,11 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+void lock_init(lock_t *);
+void lock_acquire(lock_t *);
+void lock_release(lock_t *);
+
+// lock_t
+typedef struct lock_t{
+    int acquired;
+} lock_t;
