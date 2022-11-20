@@ -93,6 +93,7 @@ sys_uptime(void)
 int
 sys_clone(void)
 {
+  //check for alignment
   return clone(0, 0, 0, 0);
 }
 int
