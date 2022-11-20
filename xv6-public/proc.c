@@ -233,6 +233,8 @@ clone(void(*fcn)(void *, void *), void *arg1, void *arg2, void *stack){
   }
 
   // Copy process state from proc.
+
+  // FIRST CHANGE: no copyuvm, since sharing same page dir
   if((np->pgdir = curproc->pgdir) == 0){
     kfree(np->kstack);
     np->kstack = 0;
@@ -243,13 +245,18 @@ clone(void(*fcn)(void *, void *), void *arg1, void *arg2, void *stack){
   np->parent = curproc;
   *np->tf = *curproc->tf;
 
+  // MAIN CHANGES
+
   //setting bottom of kstack
   stack = stack + PGSIZE;
-  //store arg 1
+  //store in reverse order
   *(stack + 8) = *arg2;
   *(stack +4) = *arg1;
+  //store return address
   *(stack) = 0xffffffff;
+  //setting eip to address where function starts executing
   np->tf->eip = *fcn;
+  //store top of stack (ret address) in esp
   np->tf->esp = stack;
 
   for(i = 0; i < NOFILE; i++)
