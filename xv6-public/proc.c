@@ -250,8 +250,8 @@ clone(void(*fcn)(void *, void *), void *arg1, void *arg2, void *stack){
   //setting bottom of kstack
   stack = stack + PGSIZE;
   //store in reverse order
-  *(stack + 8) = *arg2;
-  *(stack +4) = *arg1;
+  *(stack - 8) = *arg2;
+  *(stack - 4) = *arg1;
   //store return address
   *(stack) = 0xffffffff;
   //setting eip to address where function starts executing
