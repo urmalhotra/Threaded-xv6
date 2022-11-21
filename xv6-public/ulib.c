@@ -106,7 +106,7 @@ memmove(void *vdst, const void *vsrc, int n)
 }
 
 void 
-lock_init(struct lock_t *spinlock)
+lock_init(lock_t *spinlock)
 {
   spinlock->acquired = 0;
 }
