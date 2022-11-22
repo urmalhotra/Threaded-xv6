@@ -250,15 +250,16 @@ clone(void(*fcn)(void *, void *), void *arg1, void *arg2, void *stack){
   //setting bottom of kstack
   stack = stack + PGSIZE;
   //store in reverse order
-  *(stack - 8) = *arg2;
-  *(stack - 4) = *arg1;
+  *((uint*)stack - 8) = (uint)arg2;
+  *((uint*)stack - 4) = (uint)arg1;
   //store return address
-  *(stack) = 0xffffffff;
+  *((uint*)stack) = 0xffffffff;
   //setting eip to address where function starts executing
-  np->tf->eip = *fcn;
+  np->tf->eip = (uint)fcn;
   //store top of stack (ret address) in esp
-  np->tf->esp = stack;
-
+  //MADE CHANGE HERE!!
+  //np->tf->esp = stack;
+  np->usrstack = stack;
   for(i = 0; i < NOFILE; i++)
     if(curproc->ofile[i])
       np->ofile[i] = filedup(curproc->ofile[i]);
@@ -294,7 +295,7 @@ join(void **stack){
       if(p->state == ZOMBIE){
         // Found one.
         pid = p->pid;
-        *stack = p->stack;
+        *stack = p->usrstack;
         kfree(p->kstack);
         p->kstack = 0;
         //freevm(p->pgdir);
@@ -302,6 +303,7 @@ join(void **stack){
         p->parent = 0;
         p->name[0] = 0;
         p->killed = 0;
+        p->usrstack = 0;
         p->state = UNUSED;
         release(&ptable.lock);
         return pid;
@@ -380,7 +382,7 @@ wait(void)
     // Scan through table looking for exited children.
     havekids = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->pgdir == currproc->pgdir || p->parent != curproc)
+      if(p->pgdir == curproc->pgdir || p->parent != curproc)
         continue;
       havekids = 1;
       if(p->state == ZOMBIE){

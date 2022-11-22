@@ -105,6 +105,14 @@ memmove(void *vdst, const void *vsrc, int n)
   return vdst;
 }
 
+int thread_join(void){
+  void* stack;
+  int wait_pid = -1;
+  wait_pid = join(&stack);
+  free(stack);
+  return wait_pid;
+}
+
 void 
 lock_init(lock_t *spinlock)
 {
