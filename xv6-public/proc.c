@@ -247,19 +247,19 @@ clone(void(*fcn)(void *, void *), void *arg1, void *arg2, void *stack){
 
   // MAIN CHANGES
 
-  //setting bottom of kstack
-  stack = stack + PGSIZE;
-  //store in reverse order
-  *((uint*)stack - 8) = (uint)arg2;
-  *((uint*)stack - 4) = (uint)arg1;
-  //store return address
-  *((uint*)stack) = 0xffffffff;
-  //setting eip to address where function starts executing
-  np->tf->eip = (uint)fcn;
-  //store top of stack (ret address) in esp
-  //MADE CHANGE HERE!!
-  //np->tf->esp = stack;
   np->usrstack = stack;
+  //setting bottom of kstack
+  np->usrstack += PGSIZE;
+  //store in reverse order
+  *((uint*)np->usrstack-8) = (uint)0xffffffff;
+  *((uint*)np->usrstack-4) = (uint)arg1;
+  *((uint*)np->usrstack) = (uint)arg2;
+  //setting eip to address where function starts executing
+  np->tf->eip = *(uint*)fcn;
+  //store top of stack (ret address) in esp
+  np->tf->esp = *(uint*)stack;
+  np->tf->ebp = *(uint*)stack;
+
   for(i = 0; i < NOFILE; i++)
     if(curproc->ofile[i])
       np->ofile[i] = filedup(curproc->ofile[i]);
@@ -321,6 +321,7 @@ join(void **stack){
   }
 
 }
+
 
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state

@@ -105,14 +105,6 @@ memmove(void *vdst, const void *vsrc, int n)
   return vdst;
 }
 
-int thread_join(void){
-  void* stack;
-  int wait_pid = -1;
-  wait_pid = join(&stack);
-  free(stack);
-  return wait_pid;
-}
-
 void 
 lock_init(lock_t *spinlock)
 {
@@ -122,12 +114,27 @@ lock_init(lock_t *spinlock)
 void 
 lock_acquire(lock_t *spinlock)
 {
-  while (xchg((volatile uint*)&spinlock->acquired, 1) == 1)
+  while (xchg((volatile uint *)&spinlock->acquired, 1) == 1)
     ; // spin
 }
 
 void 
 lock_release(lock_t *spinlock)
 {
-  xchg((volatile uint*)&spinlock->acquired, 0);
+  xchg((volatile uint *)&spinlock->acquired, 0);
+}
+
+int thread_create(void (*start_routine)(void *, void *), void *arg1, void *arg2){
+  void* stack = malloc(2*4096);
+  if((uint)stack % 4096)
+    stack = stack + (4096 - (uint)stack % 4096);
+  return clone(start_routine, arg1, arg2, stack);
+}
+
+int thread_join(void){
+  void* stack;
+  int wait_pid = -1;
+  wait_pid = join(&stack);
+  free(stack);
+  return wait_pid;
 }

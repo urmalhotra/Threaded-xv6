@@ -94,11 +94,28 @@ int
 sys_clone(void)
 {
   //check for alignment
-  return clone(0, 0, 0, 0);
+  void (*fun_ptr)(void*,void*);
+  void * arg1;
+  void* arg2;
+  void* stack;
+  if (argptr(0,(void*)&fun_ptr, sizeof(void*))< 0){
+    return -1;
+  }
+  if (argptr(0,(void*)&arg1, sizeof(void*))< 0){
+    return -1;
+  }
+  if (argptr(0,(void*)&arg2, sizeof(void*))< 0){
+    return -1;
+  }
+  if (argptr(0,(void*)&stack, sizeof(void*))< 0){
+    return -1;
+  }
+  return clone(fun_ptr, arg1, arg2, stack);
 }
 int
 sys_join(void)
 {
+  return join(0);
   void** stack;
   if(argptr(0, (void*)&stack, sizeof(void*)) < 0){
     return -1;
