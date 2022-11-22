@@ -114,12 +114,12 @@ lock_init(lock_t *spinlock)
 void 
 lock_acquire(lock_t *spinlock)
 {
-  while (xchg(&spinlock->acquired, 1) == 1)
+  while (xchg((volatile uint *)&spinlock->acquired, 1) == 1)
     ; // spin
 }
 
 void 
 lock_release(lock_t *spinlock)
 {
-  xchg(&spinlock->acquired, 0);
+  xchg((volatile uint *)&spinlock->acquired, 0);
 }
