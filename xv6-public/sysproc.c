@@ -113,7 +113,7 @@ sys_clone(void)
   if((uint)stack % 4096 != 0){
     return -1;
   }
-  if((uint)stack > (uint)myproc()->sz){
+  if(((int)stack + 2*PGSIZE)> myproc()->sz){
     return -1;
   }
   return clone(fun_ptr, arg1, arg2, stack);

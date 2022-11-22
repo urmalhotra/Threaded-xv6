@@ -1,14 +1,14 @@
-/* clone and verify that address space is shared */
+/* clone and join syscalls */
 #include "types.h"
 #include "user.h"
 
 #undef NULL
 #define NULL ((void*)0)
 
-int ppid;
 #define PGSIZE (4096)
 
-volatile int global = 1;
+int ppid;
+int global = 1;
 
 #define assert(x) if (x) {} else { \
    printf(1, "%s: %d ", __FILE__, __LINE__); \
@@ -24,30 +24,41 @@ int
 main(int argc, char *argv[])
 {
    ppid = getpid();
-   void *stack, *p = malloc(PGSIZE*2);
+
+   void *stack, *p = malloc(PGSIZE * 2);
    assert(p != NULL);
-   printf(1, "through 1");
+   printf(1,"ok1");
    if((uint)p % PGSIZE)
      stack = p + (PGSIZE - (uint)p % PGSIZE);
    else
      stack = p;
 
-   int clone_pid = clone(worker, 0, 0, stack);
-   printf(1, (char*)clone_pid);
+   int arg1 = 42, arg2 = 24;
+   int clone_pid = clone(worker, &arg1, &arg2, stack);
    assert(clone_pid > 0);
-   while(global != 5);
-   printf(1, "TEST PASSED\n");
-   
+   printf(1,"ok1");
+
    void *join_stack;
    int join_pid = join(&join_stack);
    assert(join_pid == clone_pid);
+   printf(1,"ok1");
+   assert(stack == join_stack);
+   printf(1,"ok1");
+   assert(global == 2);
+   printf(1,"ok1");
+   
+   printf(1, "TEST PASSED\n");
    free(p);
    exit();
 }
 
 void
 worker(void *arg1, void *arg2) {
+   int tmp1 = *(int*)arg1;
+   int tmp2 = *(int*)arg2;
+   assert(tmp1 == 42);
+   assert(tmp2 == 24);
    assert(global == 1);
-   global = 5;
+   global++;
    exit();
 }
