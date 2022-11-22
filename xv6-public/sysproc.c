@@ -94,11 +94,11 @@ int
 sys_clone(void)
 {
   //check for alignment
-  void (*fun_ptr)(void*,void*);
+  void (*fun_ptr)(void* ,void* );
   void * arg1;
   void* arg2;
   void* stack;
-  if (argptr(0,(void*)&fun_ptr, sizeof(void*))< 0){
+  if (argptr(0,(void*)&fun_ptr, sizeof(fun_ptr))< 0){
     return -1;
   }
   if (argptr(0,(void*)&arg1, sizeof(void*))< 0){
@@ -108,6 +108,12 @@ sys_clone(void)
     return -1;
   }
   if (argptr(0,(void*)&stack, sizeof(void*))< 0){
+    return -1;
+  }
+  if((uint)stack % 4096 != 0){
+    return -1;
+  }
+  if((uint)stack > (uint)myproc()->sz){
     return -1;
   }
   return clone(fun_ptr, arg1, arg2, stack);

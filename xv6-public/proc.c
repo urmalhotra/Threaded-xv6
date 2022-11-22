@@ -251,14 +251,17 @@ clone(void(*fcn)(void *, void *), void *arg1, void *arg2, void *stack){
   //setting bottom of kstack
   np->usrstack += PGSIZE;
   //store in reverse order
-  *((uint*)np->usrstack-8) = (uint)0xffffffff;
-  *((uint*)np->usrstack-4) = (uint)arg1;
-  *((uint*)np->usrstack) = (uint)arg2;
+  //memset(np->usrstack-8, 0, 4);
+  *((uint*)(np->usrstack-(3*sizeof(void*)))) = 0xffffffff;
+  //memset(np->usrstack-4, 0, 4);
+  *((uint*)np->usrstack-(2*sizeof(void*))) = (uint)arg1;
+  //memset(np->usrstack, 0, 4);
+  *((uint*)np->usrstack-sizeof(void*)) = (uint)arg2;
   //setting eip to address where function starts executing
-  np->tf->eip = *(uint*)fcn;
+  *((uint*)np->tf->eip - sizeof(void*)) = (uint)(fcn);
   //store top of stack (ret address) in esp
-  np->tf->esp = *(uint*)stack;
-  np->tf->ebp = *(uint*)stack;
+  *((uint*)np->tf->esp - sizeof(void*)) = *((uint*)(np->usrstack-(3*sizeof(void*))));
+  np->tf->ebp = np->tf->esp;
 
   for(i = 0; i < NOFILE; i++)
     if(curproc->ofile[i])

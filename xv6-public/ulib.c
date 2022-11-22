@@ -4,6 +4,7 @@
 #include "user.h"
 #include "x86.h"
 
+uint original_stack = 0;
 char*
 strcpy(char *s, const char *t)
 {
@@ -126,12 +127,12 @@ lock_release(lock_t *spinlock)
 
 int thread_create(void (*start_routine)(void *, void *), void *arg1, void *arg2){
   void* stack = malloc(2*4096);
-  if((uint)stack % 4096)
-    stack = stack + (4096 - (uint)stack % 4096);
+  original_stack = *(uint*)(stack);
   return clone(start_routine, arg1, arg2, stack);
 }
 
 int thread_join(void){
+  //free global var ?
   void* stack;
   int wait_pid = -1;
   wait_pid = join(&stack);
