@@ -101,13 +101,13 @@ sys_clone(void)
   if (argptr(0,(void*)&fun_ptr, sizeof(fun_ptr))< 0){
     return -1;
   }
-  if (argptr(0,(void*)&arg1, sizeof(void*))< 0){
+  if (argptr(1,(void*)&arg1, sizeof(void*))< 0){
     return -1;
   }
-  if (argptr(0,(void*)&arg2, sizeof(void*))< 0){
+  if (argptr(2,(void*)&arg2, sizeof(void*))< 0){
     return -1;
   }
-  if (argptr(0,(void*)&stack, sizeof(void*))< 0){
+  if (argptr(3,(void*)&stack, sizeof(void*))< 0){
     return -1;
   }
   if((uint)stack % 4096 != 0){
